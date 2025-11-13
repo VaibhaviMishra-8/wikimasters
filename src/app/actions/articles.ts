@@ -1,6 +1,14 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import db from "@/db";
+import { authorizeUserToEditArticle } from "@/db/authz";
+import { articles } from "@/db/schema";
+import { stackServerApp } from "@/stack/server";
+
+// Server actions for articles (stubs)
+// TODO: Replace with real database operations when ready
 
 export type CreateArticleInput = {
   title: string;
@@ -16,20 +24,61 @@ export type UpdateArticleInput = {
 };
 
 export async function createArticle(data: CreateArticleInput) {
-  // TODO: Replace with actual database call
+  const user = await stackServerApp.getUser();
+  if (!user) {
+    throw new Error("❌ Unauthorized");
+  }
+
   console.log("✨ createArticle called:", data);
+
+  await db.insert(articles).values({
+    title: data.title,
+    content: data.content,
+    slug: `${Date.now()}`,
+    published: true,
+    authorId: user.id,
+  });
+
   return { success: true, message: "Article create logged (stub)" };
 }
 
 export async function updateArticle(id: string, data: UpdateArticleInput) {
-  // TODO: Replace with actual database update
+  const user = await stackServerApp.getUser();
+  if (!user) {
+    throw new Error("❌ Unauthorized");
+  }
+
+  if (!(await authorizeUserToEditArticle(user.id, +id))) {
+    throw new Error("❌forbidden");
+  }
+
   console.log("📝 updateArticle called:", { id, ...data });
+
+  await db
+    .update(articles)
+    .set({
+      title: data.title,
+      content: data.content,
+    })
+    .where(eq(articles.id, +id));
+
   return { success: true, message: `Article ${id} update logged (stub)` };
 }
 
 export async function deleteArticle(id: string) {
-  // TODO: Replace with actual database delete
+  const user = await stackServerApp.getUser();
+  if (!user) {
+    throw new Error("❌ Unauthorized");
+  }
+
+  if (!(await authorizeUserToEditArticle(user.id, +id))) {
+    throw new Error("❌forbidden");
+  }
+
   console.log("🗑️ deleteArticle called:", id);
+
+  await db.delete(articles).where(eq(articles.id, +id));
+
   return { success: true, message: `Article ${id} delete logged (stub)` };
 }
 
