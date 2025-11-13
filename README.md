@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+📝 WikiMasters
 
-## Getting Started
+WikiMasters is a full-stack wiki-style web application built with Next.js.
+It allows users to sign up, log in, create articles, edit existing articles, and publish content — all in a simple, modern interface.
 
-First, run the development server:
+🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+🔐 User Authentication
+Secure sign-in and sign-up workflow.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+📝 Create & Edit Articles
+Rich article editor where users can write content, update it anytime, upload pictures, and publish.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+📄 Slug-based Article Pages
+Every article gets its own unique URL.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+📦 Full CRUD Support
+Create, read, update, and delete articles.
 
-## Learn More
+⚡ Next.js App Router
+Built using the latest Next.js features and modern best practices.
 
-To learn more about Next.js, take a look at the following resources:
+🧰 Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Next.js 14
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+TypeScript
 
-## Deploy on Vercel
+Drizzle ORM (for type-safe database queries)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+PostgreSQL (database)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Tailwind CSS (styling)
+
+Stack Auth / Auth provider (for authentication)
+
+Vercel (deployment)
