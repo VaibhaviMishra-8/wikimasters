@@ -11,8 +11,6 @@ async function main() {
     console.log(`🌱 Starting DB seed with seed ${SEED}...`);
 
     console.log("🧹 Truncating articles table and restarting identity...");
-    // Use TRUNCATE + RESTART IDENTITY so sequences are reset to match an empty table.
-    // This is simpler and avoids needing to call setval later.
     await sql.query("TRUNCATE TABLE articles RESTART IDENTITY CASCADE;");
 
     console.log("🔎 Querying existing users...");
@@ -70,9 +68,6 @@ async function main() {
 
     console.log(`✅ Inserted ${SEED_COUNT} article(s) into the database\n`);
 
-    // Ensure the articles sequence is synced to the current MAX(id). This is a
-    // safety measure in case the DB was imported or mutated in a way that left
-    // the sequence behind the table's max value.
     try {
       await sql.query(
         `SELECT setval(pg_get_serial_sequence('articles','id'), COALESCE((SELECT MAX(id) FROM articles), 1), true);`,

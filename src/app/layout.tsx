@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Wikimasters",
-  description: "Learn how to build and scale Next.js apps with Brian Holt",
+  description: "a scalable Next.js app",
 };
 
 export default function RootLayout({

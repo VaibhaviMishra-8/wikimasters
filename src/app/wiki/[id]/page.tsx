@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import WikiArticleViewer from "@/components/wiki-article-viewer";
+import { authorizeUserToEditArticle } from "@/db/authz";
 import { getArticleById } from "@/lib/data/articles";
+import { stackServerApp } from "@/stack/server";
 
 interface ViewArticlePageProps {
   params: Promise<{
@@ -13,8 +15,15 @@ export default async function ViewArticlePage({
 }: ViewArticlePageProps) {
   const { id } = await params;
 
-  // Mock permission check - in a real app, this would come from auth/user context
-  const canEdit = true; // Set to true for demonstration
+  let canEdit = false;
+  try {
+    const user = await stackServerApp.getUser();
+    if (user) {
+      canEdit = await authorizeUserToEditArticle(user.id, +id);
+    }
+  } catch (_err) {
+    canEdit = false;
+  }
 
   const article = await getArticleById(+id);
 

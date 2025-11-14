@@ -2,6 +2,7 @@
 
 import MDEditor from "@uiw/react-md-editor";
 import { Upload, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { useState } from "react";
 import { createArticle, updateArticle } from "@/app/actions/articles";
@@ -16,6 +17,7 @@ interface WikiEditorProps {
   initialContent?: string;
   isEditing?: boolean;
   articleId?: string;
+  userId?: string;
 }
 
 interface FormErrors {
@@ -28,14 +30,15 @@ export default function WikiEditor({
   initialContent = "",
   isEditing = false,
   articleId,
+  userId = "user-1",
 }: WikiEditorProps) {
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
   const [files, setFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
-  // Validate form
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
@@ -51,7 +54,6 @@ export default function WikiEditor({
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle file upload
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = event.target.files;
     if (selectedFiles) {
@@ -60,13 +62,10 @@ export default function WikiEditor({
     }
   };
 
-  // Remove file
   const removeFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Handle form submission using Server Actions
-  // We import server actions and call them from the client component.
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -77,11 +76,9 @@ export default function WikiEditor({
     try {
       let imageUrl: string | undefined;
 
-      // If there's at least one file, upload the first one via server action
       if (files.length > 0) {
         const fd = new FormData();
         fd.append("files", files[0]);
-        // uploadFile is a server action imported below
         const uploaded = await uploadFile(fd);
         imageUrl = uploaded?.url;
       }
@@ -89,16 +86,22 @@ export default function WikiEditor({
       const payload = {
         title: title.trim(),
         content: content.trim(),
-        authorId: "user-1", // TODO: wire real user id
         imageUrl,
+        authorId: userId,
       };
 
       if (isEditing && articleId) {
         await updateArticle(articleId, payload);
-        alert("Article updated (stub)");
+
+        router.push(`/wiki/${articleId}`);
       } else {
-        await createArticle(payload);
-        alert("Article created (stub)");
+        const result = await createArticle(payload);
+
+        if (result.id) {
+          router.push(`/wiki/${result.id}`);
+        } else {
+          router.push("/");
+        }
       }
     } catch (err) {
       console.error("Error submitting article:", err);
@@ -108,15 +111,12 @@ export default function WikiEditor({
     }
   };
 
-  // Handle cancel
   const handleCancel = () => {
-    // In a real app, you would navigate back
     const shouldLeave = window.confirm(
       "Are you sure you want to cancel? Any unsaved changes will be lost.",
     );
     if (shouldLeave) {
       console.log("User cancelled editing");
-      // navigation logic would go here
     }
   };
 
@@ -144,6 +144,7 @@ export default function WikiEditor({
               <Label htmlFor="title">Title *</Label>
               <Input
                 id="title"
+                name="title"
                 type="text"
                 placeholder="Enter article title..."
                 value={title}
@@ -177,10 +178,10 @@ export default function WikiEditor({
                   hideToolbar={false}
                   visibleDragbar={false}
                   textareaProps={{
+                    name: "content",
                     placeholder: "Write your article content in Markdown...",
                     style: { fontSize: 14, lineHeight: 1.5 },
-                    // make these explicit so SSR and client output match exactly
-                    autoCapitalize: "off",
+                    autoCapitalize: "none",
                     autoComplete: "off",
                     autoCorrect: "off",
                     spellCheck: false,
@@ -270,13 +271,14 @@ export default function WikiEditor({
                 variant="outline"
                 onClick={handleCancel}
                 disabled={isSubmitting}
+                className="cursor-pointer"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="min-w-[100px]"
+                className="min-w-[100px] cursor-pointer"
               >
                 {isSubmitting ? "Saving..." : "Save Article"}
               </Button>
